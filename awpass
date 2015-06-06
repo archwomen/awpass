@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# This script wraps around pass for safe usage.
+# 1. sets PASSWORD_STORE_DIR so that aw's pass doesn't get mixed with the user's
+# 2. pulls from remote before any operation
+#    pushes to remote after any operation
+#    non-ff merges, rebases, history rewriting are not possible
+# Internet access is required.
+# Offline use is not expected except in extremely rare and specific circumstances.
+# For offline use, set the environment OFFLINE to any non-empty value.
+# Remember to push any changes you have made.
+
+# How to use this script. (See README for full steps.)
+# 0. pass, gpg2, and git must all be setup
+# 1. clone the pass git repo somewhere, and configure your git user
+# 2. save this script to somewhere in $PATH and make executable
+# 3. edit script, set PASSWORD_STORE_DIR to path of the git repo
+# The remote should be set automatically by clone.
+# If not, set the remote branch for each branch.
+
+# path to the pass git repo
+export PASSWORD_STORE_DIR=/path/to/pass/git/repository
+
+
+# by default we push and pull from remote
+_dopull=true
+_dopush=true
+
+# don't git push (or pull) for for some options
+case "$1" in
+  help|--help) ;&
+  version|--version) OFFLINE=yup ;;
+  show|ls|list) ;&
+  find|search) ;&
+  grep) _dopush=false ;;
+esac
+
+if [[ -n "$OFFLINE" ]]
+then
+  _dopull=false
+  _dopush=false
+  unset OFFLINE
+fi
+
+
+$_dopull && pass git pull --ff-only --quiet
+
+pass "$@"
+ec="$?"
+
+$_dopush && pass git push --all --quiet
+
+exit "$ec"

@@ -1,0 +1,45 @@
+The script (also called awpass) is a *very* thin wrapper around pass.
+pass is very well designed but does not quite fit a multiuser
+workflow. This script adds two things. It points pass to the git repo
+storing passwords. It also pulls before an operation and pushes after,
+keeping the git repo safely synchronised with remote.
+
+Network access is required. To run without a network, set the envar
+OFFLINE to any non-empty value. For example:
+   OFFLINE=x awpass show RemoteServer/admin
+Do not forget to push if you have made any changes offline. As the
+files are encrypted (binary), rebase and non-ff merge are not easy.
+
+There are three stages to setup: GPG, git repo, and finally the
+script itself. Follow the checklist below.
+
+Dependencies
+- GPG2
+- Git
+- pass
+- bash
+
+GPG
+- Create a GPG key.
+- Share public key with your co-conspirators.
+- Receive all public keys of your colleagues.
+  They will have access to all the passwords.
+  Make sure GPG sees the keys as valid.
+
+Git repository
+- Clone from remote.
+- Setup remote and have master track upstream.
+  This should have been done for you by clone.
+- Configure git user and email.
+  This will appear in commits.
+
+Script
+- Copy to somewhere in $PATH.
+- Set executable.
+- Edit PASSWORD_STORE_DIR to path to the git repo.
+
+The script should work thereafter. Call as `awpass`. Output (such as 
+help) will refer to pass. This really is a thin wrapper.
+
+In zsh, if you want completion, add this to your .zshrc:
+   compdef _pass awpass
