@@ -26,10 +26,13 @@ export PASSWORD_STORE_DIR=/path/to/pass/git/repository
 _dopull=true
 _dopush=true
 
+# by default we inform user if we're offline
+_offline_echo=true
+
 # don't git push (or pull) for for some options
 case "$1" in
   help|--help) ;&
-  version|--version) OFFLINE=yup ;;
+  version|--version) OFFLINE=yup ; _offline_echo=false ;;
   show|ls|list) ;&
   find|search) ;&
   grep) _dopush=false ;;
@@ -37,6 +40,7 @@ esac
 
 if [[ -n "$OFFLINE" ]]
 then
+  $_offline_echo && echo OFFLINE MODE >&2
   _dopull=false
   _dopush=false
   unset OFFLINE
